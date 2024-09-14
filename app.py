@@ -10,6 +10,17 @@ df_clusters = pd.read_csv('data/clusters_with_stats.csv')
 # Convert the SEQ_unique column from a string to a list of strings. Values are separated by a comma
 df_clusters['SEQ_unique'] = df_clusters['SEQ_unique'].apply(lambda x: sorted(x.split(',')))
 
+# Load the CSV file with sequences, levels and clusters
+df_sequences = pd.read_csv('data/sequences_levels_clusters.csv')
+# Add the stats of clusters to the df_sequences dataframe, merging on the CLUSTER column
+df_sequences = df_sequences.merge(df_clusters[['CLUSTER', 'CORE REL EXPR_mean', 'CORE REL EXPR_std']],
+    on='CLUSTER')
+# Replace spaces in the colum names with underscores
+df_sequences.columns = df_sequences.columns.str.replace(' ', '_')
+# Round the values of expression mean and std
+df_sequences['CORE_REL_EXPR_mean'] = df_sequences['CORE_REL_EXPR_mean'].round(4)
+df_sequences['CORE_REL_EXPR_std'] = df_sequences['CORE_REL_EXPR_std'].round(4)
+
 # Initialize the RBS class
 rbs = RBS()
 
@@ -70,6 +81,12 @@ def tir_to_sequence():
             results = None
 
     return render_template('tir_to_sequence.html', tir_value=tir_value, results=results)
+
+
+@app.route('/browse_clusters', methods=['GET'])
+def browse_clusters():
+
+    return render_template('browse_clusters.html', data=df_sequences)
 
 
 if __name__ == '__main__':

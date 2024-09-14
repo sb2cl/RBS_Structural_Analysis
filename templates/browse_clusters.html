@@ -1,0 +1,41 @@
+{% extends 'index.html' %}
+
+{% block title %}Browse Clusters{% endblock %}
+
+{% block content %}
+    <h1>Browse Clusters</h1>
+
+    <table class="table table-bordered mt-3">
+        <thead>
+        <tr>
+            <th>Cluster</th>
+            <th>TIR Mean</th>
+            <th>TIR STD</th>
+            <th>Level 1</th>
+            <th>Level 2</th>
+            <th>Level 3</th>
+            <th>Level 4</th>
+            <th>Level 5</th>
+            <th>Core Sequence</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        {% for row in data.itertuples() %}
+            <tr>
+                <td>{{ row.CLUSTER }}</td>
+                <td>{{ row.CORE_REL_EXPR_mean }}</td>
+                <td>{{ row.CORE_REL_EXPR_std }}</td>
+                <td>{{ row.LEVEL_2 }}</td>
+                <td>{{ row.LEVEL_3 }}</td>
+                <td>{{ row.LEVEL_4 }}</td>
+                <td>{{ row.LEVEL_5 }}</td>
+                <td>{{ row.LEVEL_6 }}</td>
+                <td>{{ row.LEVEL_7 }}</td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+
+{% endblock %}

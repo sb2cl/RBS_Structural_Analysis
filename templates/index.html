@@ -21,13 +21,20 @@
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav me-auto mb-2 mb-md-0">
                 <li class="nav-item">
-                    <a class="nav-link{% if url_for(request.endpoint) == '/' %} active{% endif %}" aria-current="page" href="/">Home</a>
+                    <a class="nav-link{% if url_for(request.endpoint) == '/' %} active{% endif %}" aria-current="page"
+                       href="/">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link{% if url_for(request.endpoint) == '/sequence_to_tir' %} active{% endif %}" href="/sequence_to_tir">Sequence to TIR</a>
+                    <a class="nav-link{% if url_for(request.endpoint) == '/sequence_to_tir' %} active{% endif %}"
+                       href="/sequence_to_tir">Sequence to TIR</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link{% if url_for(request.endpoint) == '/tir_to_sequence' %} active{% endif %}" href="/tir_to_sequence">TIR to Sequence</a>
+                    <a class="nav-link{% if url_for(request.endpoint) == '/tir_to_sequence' %} active{% endif %}"
+                       href="/tir_to_sequence">TIR to Sequence</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link{% if url_for(request.endpoint) == '/browse_clusters' %} active{% endif %}"
+                       href="/browse_clusters">Browse Clusters</a>
                 </li>
             </ul>
         </div>
@@ -44,10 +51,11 @@
 </main>
 
 <footer class="footer mt-auto py-3 bg-light">
-  <div class="container">
-      <span class="text-muted text-center">Developed by <a href="http://sb2cl.ai2.upv.es/">SB2CL Lab</a>, <a href="https://www.upv.es/">Universitat Politecnica de Valencia</a>.
+    <div class="container">
+      <span class="text-muted text-center">Developed by <a href="http://sb2cl.ai2.upv.es/">SB2CL Lab</a>, <a
+              href="https://www.upv.es/">Universitat Politecnica de Valencia</a>.
           When using results from this app, please <a href="#">cite the original work</a>.</span>
-  </div>
+    </div>
 </footer>
 
 </body>
