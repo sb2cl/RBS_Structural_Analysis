@@ -1,0 +1,75 @@
+{% set page_name = 'sequence_to_tir' %}
+{% extends 'index.html' %}
+
+{% block title %}Sequence to TIR{% endblock %}
+
+{% block content %}
+    <h1 class="mt-2">Sequence to TIR</h1>
+    <form method="POST" class="mt-3">
+        <div class="form-group">
+            <label for="sequence">Enter the Full RBS Sequence</label>
+            <input type="text" class="form-control" id="sequence" name="sequence" value="{{ context.full_sequence }}" required>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Search</button>
+    </form>
+
+    {% if context is not none and results is not none %}
+        <h3 class="mt-5">Results</h3>
+
+        <h4 class="mt-5">Sequence Information</h4>
+        <table class="table">
+            <tr>
+                <td>Submitted Sequence</td>
+                <td>{{ context.full_sequence }}</td>
+            </tr>
+            <tr>
+                <td>Upstream</td>
+                <td>{{ context.upstream }}</td>
+            </tr>
+            <tr>
+                <td>Core</td>
+                <td><b>{{ context.core }}</b></td>
+            </tr>
+            <tr>
+                <td>Spacing</td>
+                <td>{{ context.spacing }}</td>
+            </tr>
+            <tr>
+                <td>Calculated Expression with Spacing</td>
+                <td>{{ context.expr }}</td>
+            </tr>
+            <tr>
+                <td>Relative Expression of the Core Alone</td>
+                <td>{{ context.basic_expr }}</td>
+            </tr>
+        </table>
+
+        <h4 class="mt-5">Cluster Information</h4>
+        <table class="table table-bordered mt-3">
+            {% for row in results.itertuples() %}
+                <tr>
+                    <td>Cluster ID</td>
+                    <td>{{ row.CLUSTER }}</td>
+                </tr>
+                <tr>
+                    <td>Cluster Core Mean Expression</td>
+                    <td>{{ row._2|round(4, 'floor') }}</td>
+                </tr>
+                <tr>
+                    <td>Cluster Core Expression STD</td>
+                    <td>{{ row._3|round(4, 'floor') }}</td>
+                </tr>
+                <tr>
+                    <td>Core Sequences in This Cluster</td>
+                    <td>
+                        <ul>
+                            {% for seq in row.SEQ_unique %}
+                                <li>{{ seq }}</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+{% endblock %}
