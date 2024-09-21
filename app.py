@@ -30,7 +30,7 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/sequence_to_tir', methods=['GET', 'POST'])
+@app.route('/sequence_to_etr', methods=['GET', 'POST'])
 def sequence_to_tir():
     context = {}
     results = None
@@ -50,27 +50,27 @@ def sequence_to_tir():
         results = df_clusters[
             df_clusters['SEQ_unique'].apply(lambda x: context['core'] in x if isinstance(x, list) else False)]
 
-    return render_template('sequence_to_tir.html', context=context, results=results)
+    return render_template('sequence_to_etr.html', context=context, results=results)
 
 
-@app.route('/tir_to_sequence', methods=['GET', 'POST'])
+@app.route('/etr_to_sequence', methods=['GET', 'POST'])
 def tir_to_sequence():
-    tir_value = None
+    etr_value = None
     results = None
 
     if request.method == 'POST':
 
         try:
-            tir_value = float(request.form['tir_value'])
+            etr_value = float(request.form['etr_value'])
 
             # Filter rows based on the range CORE REL EXPR mean ± CORE REL EXPR std
             # Note: Using copy to avoid SettingWithCopyWarning since we are adding a column later
-            results = df_clusters[(df_clusters['CORE REL EXPR_mean'] - df_clusters['CORE REL EXPR_std'] <= tir_value) &
+            results = df_clusters[(df_clusters['CORE REL EXPR_mean'] - df_clusters['CORE REL EXPR_std'] <= etr_value) &
                                   (df_clusters['CORE REL EXPR_mean'] + df_clusters[
-                                      'CORE REL EXPR_std'] >= tir_value)].copy()
+                                      'CORE REL EXPR_std'] >= etr_value)].copy()
 
             # Calculate the normalized distance using the mean and standard deviation
-            results['distance_normalized'] = abs(results['CORE REL EXPR_mean'] - tir_value) / results[
+            results['distance_normalized'] = abs(results['CORE REL EXPR_mean'] - etr_value) / results[
                 'CORE REL EXPR_std']
 
             # Sort by normalized distance, so the first result is the ebst
@@ -80,7 +80,7 @@ def tir_to_sequence():
 
             results = None
 
-    return render_template('tir_to_sequence.html', tir_value=tir_value, results=results)
+    return render_template('etr_to_sequence.html', etr_value=etr_value, results=results)
 
 
 @app.route('/browse_clusters', methods=['GET'])
