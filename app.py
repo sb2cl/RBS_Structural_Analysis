@@ -55,22 +55,22 @@ def sequence_to_tir():
 
 @app.route('/etr_to_sequence', methods=['GET', 'POST'])
 def tir_to_sequence():
-    etr_value = None
+    tir_value = None
     results = None
 
     if request.method == 'POST':
 
         try:
-            etr_value = float(request.form['etr_value'])
+            tir_value = float(request.form['etr_value'])
 
             # Filter rows based on the range CORE REL EXPR mean ± CORE REL EXPR std
             # Note: Using copy to avoid SettingWithCopyWarning since we are adding a column later
-            results = df_clusters[(df_clusters['CORE REL EXPR_mean'] - df_clusters['CORE REL EXPR_std'] <= etr_value) &
+            results = df_clusters[(df_clusters['CORE REL EXPR_mean'] - df_clusters['CORE REL EXPR_std'] <= tir_value) &
                                   (df_clusters['CORE REL EXPR_mean'] + df_clusters[
-                                      'CORE REL EXPR_std'] >= etr_value)].copy()
+                                      'CORE REL EXPR_std'] >= tir_value)].copy()
 
             # Calculate the normalized distance using the mean and standard deviation
-            results['distance_normalized'] = abs(results['CORE REL EXPR_mean'] - etr_value) / results[
+            results['distance_normalized'] = abs(results['CORE REL EXPR_mean'] - tir_value) / results[
                 'CORE REL EXPR_std']
 
             # Sort by normalized distance, so the first result is the ebst
