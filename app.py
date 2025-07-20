@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
+import json
 import pandas as pd
 
 from classes.RBS import RBS
@@ -24,11 +25,40 @@ df_sequences['CORE_REL_EXPR_std'] = df_sequences['CORE_REL_EXPR_std'].round(4)
 # Initialize the RBS class
 rbs = RBS()
 
+# Load the SD Core data with expression levels and statistics
+with open('data/sd_core_data.json', 'r', encoding='utf8') as json_file:
+    SEQUENCE_DATA = json.load(json_file)
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
+@app.route('/browse_sequences', methods=['GET', 'POST'])
+def browse_sequences():
+    context = {}
+
+    return render_template('browse_sequences.html', context=context, app_data=SEQUENCE_DATA)
+
+@app.route('/calculate', methods=['POST'])
+def calculate():
+    """
+    Return the statistics for a given input string.
+
+    This function is a Flask route that handles POST requests to the '/calculate' endpoint.
+    It expects a JSON payload with an 'inputString' key.
+    The function returns a JSON response with the statistics for the input string.
+
+    Returns:
+        A JSON response with the statistical values.
+    """
+
+    # Extract the input string from the request payload
+    data = request.json
+    input_string = data.get('inputString', '')
+
+    seq = SEQUENCE_DATA.get(input_string, None)
+
+    return jsonify(seq)
 
 @app.route('/sequence_to_etr', methods=['GET', 'POST'])
 def sequence_to_tir():
@@ -42,9 +72,6 @@ def sequence_to_tir():
         # Determine the sequence parts
         context['upstream'], context['core'], context['spacing'], context['expr'] = rbs.predict_spacing(
             context['full_sequence'])
-
-        # Get the basic expression level
-        context['basic_expr'] = rbs.SEQS[context['core']]
 
         # Check if core sequence is present in the cores that belong to a cluster
         results = df_clusters[

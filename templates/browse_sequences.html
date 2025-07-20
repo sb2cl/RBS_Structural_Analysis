@@ -1,0 +1,193 @@
+{% extends 'index.html' %}
+
+{% block title %}Browse Sequences{% endblock %}
+
+{% block javascript %}
+    <script type="text/javascript">
+    function validateInput(input) {
+        const validChars = ['A', 'T', 'C', 'G'];
+        if (!validChars.includes(input.value.toUpperCase())) {
+            input.value = ''; // Clear invalid input
+        } else {
+            input.value = input.value.toUpperCase(); // Convert to uppercase
+        }
+    }
+
+    async function updateRange() {
+        let inputString = '';
+        for (let i = 1; i <= 6; i++) {
+            const nucleotideInput = document.getElementById(`nucleotide${i}`).value;
+            inputString += nucleotideInput ? nucleotideInput : '_';
+        }
+
+        const response = await fetch('/calculate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({inputString: inputString})
+        });
+        const data = await response.json();
+
+        document.getElementById('info_count').textContent = data.count;
+        document.getElementById('info_mean').textContent = data.mean;
+        document.getElementById('info_std').textContent = data.std;
+        document.getElementById('info_cv').textContent = data.cv;
+        document.getElementById('info_min').textContent = data.min;
+        document.getElementById('info_max').textContent = data.max;
+        document.getElementById('info_range').textContent = data.range;
+
+        let trace = {
+            x: data.values,
+            type: 'histogram',
+        };
+        let histogram_data = [trace];
+        Plotly.newPlot('histogram', histogram_data);
+    }
+
+    function filterTable() {
+        let inputString = '';
+        for (let i = 1; i <= 6; i++) {
+            const nucleotideInput = document.getElementById(`nucleotide${i}`).value;
+            inputString += nucleotideInput ? nucleotideInput : '_';
+        }
+
+        const rows = document.querySelectorAll('#sequenceTable tbody tr');
+        rows.forEach(row => {
+            const sequence = row.cells[0].textContent;
+            if (matchesPattern(sequence, inputString)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    function matchesPattern(sequence, pattern) {
+        for (let i = 0; i < pattern.length; i++) {
+            if (pattern[i] !== '_' && pattern[i] !== sequence[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Initial call to the updateRange function to show histogram immediately
+    updateRange();
+</script>
+{% endblock %}
+
+{% block content %}
+    <h1>Core RBS analysis</h1>
+    <div class="row">
+        <div class="col-md-12">
+            <div id="nucleotideContainer">
+                <form class="row g-2">
+                    <div class="col-auto">
+                        <input type="text" maxlength="1" class="nucleotide-input form-control"
+                               oninput="validateInput(this); updateRange(); filterTable()" id="nucleotide1"
+                               placeholder="_">
+                    </div>
+                    <div class="col-auto">
+                        <input type="text" maxlength="1" class="nucleotide-input form-control"
+                               oninput="validateInput(this); updateRange(); filterTable()" id="nucleotide2"
+                               placeholder="_">
+                    </div>
+                    <div class="col-auto">
+                        <input type="text" maxlength="1" class="nucleotide-input form-control"
+                               oninput="validateInput(this); updateRange(); filterTable()" id="nucleotide3"
+                               placeholder="_">
+                    </div>
+                    <div class="col-auto">
+                        <input type="text" maxlength="1" class="nucleotide-input form-control"
+                               oninput="validateInput(this); updateRange(); filterTable()" id="nucleotide4"
+                               placeholder="_">
+                    </div>
+                    <div class="col-auto">
+                        <input type="text" maxlength="1" class="nucleotide-input form-control"
+                               oninput="validateInput(this); updateRange(); filterTable()" id="nucleotide5"
+                               placeholder="_">
+                    </div>
+                    <div class="col-auto">
+                        <input type="text" maxlength="1" class="nucleotide-input form-control"
+                               oninput="validateInput(this); updateRange(); filterTable()" id="nucleotide6"
+                               placeholder="_">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-6">
+            <table id="infoTable" class="table">
+                <tbody>
+                <tr>
+                    <td># of Sequences</td>
+                    <td id="info_count"></td>
+                </tr>
+                <tr>
+                    <td>Mean Strength</td>
+                    <td id="info_mean"></td>
+                </tr>
+                <tr>
+                    <td>Std Deviation</td>
+                    <td id="info_std"></td>
+                </tr>
+                <tr>
+                    <td>Coeff. of Variation</td>
+                    <td id="info_cv"></td>
+                </tr>
+                <tr>
+                    <td>Min Strength</td>
+                    <td id="info_min"></td>
+                </tr>
+                <tr>
+                    <td>Max Strength</td>
+                    <td id="info_max"></td>
+                </tr>
+                <tr>
+                    <td>Range</td>
+                    <td id="info_range"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-6">
+            <div id="histogram"></div>
+        </div>
+    </div>
+
+    <div class="col-md-12 mt-3">
+        <table id="sequenceTable" class="table">
+            <thead>
+            <tr>
+                <th>Sequence</th>
+                <th>Count</th>
+                <th>Mean</th>
+                <th>Std Dev</th>
+                <th>Coeff. of Variation</th>
+                <th>Min</th>
+                <th>Max</th>
+                <th>Range</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for sequence, sequence_data in app_data.items() %}
+            <tr>
+                <td class="sequence">{{ sequence }}</td>
+                <td>{{ sequence_data.count }}</td>
+                <td>{{ sequence_data.mean }}</td>
+                <td>{{ sequence_data.std }}</td>
+                <td>{{ sequence_data.cv }}</td>
+                <td>{{ sequence_data.min }}</td>
+                <td>{{ sequence_data.max }}</td>
+                <td>{{ sequence_data.range }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
