@@ -22,6 +22,9 @@ df_sequences.columns = df_sequences.columns.str.replace(' ', '_')
 df_sequences['CORE_REL_EXPR_mean'] = df_sequences['CORE_REL_EXPR_mean'].round(4)
 df_sequences['CORE_REL_EXPR_std'] = df_sequences['CORE_REL_EXPR_std'].round(4)
 
+# Load the CSV file with the tree data
+df_tree_data = pd.read_csv('data/final_paths_ordered.csv')
+
 # Initialize the RBS class
 rbs = RBS()
 
@@ -110,11 +113,82 @@ def etr_to_sequence():
     return render_template('etr_to_sequence.html', etr_value=etr_value, results=results)
 
 
-@app.route('/browse_clusters', methods=['GET'])
-def browse_clusters():
+@app.route('/browse_clouds', methods=['GET'])
+def browse_clouds():
 
-    return render_template('browse_clusters.html', data=df_sequences)
+    return render_template('browse_clouds.html', data=df_sequences)
 
+
+@app.route('/tree_view', methods=['GET'])
+def tree_view():
+    """
+    Make a visualization of the pruned tree.
+    :return:
+    """
+
+    # Build unique hierarchical nodes using path-based ids
+    seen = set()
+    ids = []
+    labels = []
+    parents = []
+    text = []
+
+    for _, row in df_tree_data.iterrows():
+        # start at root
+        parent_path = row['Level 1']
+        if parent_path not in seen:
+            seen.add(parent_path)
+            ids.append(parent_path)
+            labels.append(parent_path)
+            parents.append("")
+            text.append("")
+
+        # iterate deeper levels
+        for lvl in range(2, 8):
+            label = row[f'Level {lvl}']
+            current_path = f"{parent_path}/{label}"
+            if current_path not in seen:
+                seen.add(current_path)
+                ids.append(current_path)
+                labels.append(label)
+                parents.append(parent_path)
+                # only leaf level get strength
+                if lvl == 7:
+                    text.append(f"{row['Relative Strength']}")
+                else:
+                    text.append("")
+            # update parent for next iteration
+            parent_path = current_path
+
+    fig_data = {
+        'ids': ids,
+        'labels': labels,
+        'parents': parents,
+        'type': 'sunburst',
+        'text': text,
+        'textinfo': 'label+text',
+        'hoverinfo': 'label+text',
+    }
+
+    return render_template('tree_view.html', data=json.dumps(fig_data))
+
+@app.route('/clouds_view', methods=['GET'])
+def clouds_view():
+    """
+    Make a visualization of the clouds from the df_clusters dataframe
+    :return:
+    """
+
+    dff = df_clusters.copy()
+    dff["CORE REL EXPR_std"] = dff["CORE REL EXPR_std"].fillna(0)
+
+    return render_template(
+        "clouds_view.html",
+        clusters=dff["CLUSTER"].tolist(),
+        means=dff["CORE REL EXPR_mean"].tolist(),
+        stds=dff["CORE REL EXPR_std"].tolist(),
+        seqs=dff["SEQ_unique"].tolist(),
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,0 +1,21 @@
+{% extends 'index.html' %}
+
+{% block title %}Tree View{% endblock %}
+
+{% block javascript %}
+    <script>
+    const fig = JSON.parse('{{ data | safe }}');
+    const layout = {
+      margin: { l: 0, r: 0, b: 0, t: 0 },
+      sunburstcolorway: ["#636efa","#ef553b","#00cc96","#ab63fa","#ffa15a","#19d3f3","#FF6692"],
+      extendsunburstcolorway: true
+    };
+    Plotly.newPlot('tree', [fig], layout);
+  </script>
+{% endblock %}
+
+{% block content %}
+    <h1>Tree View</h1>
+    Click on a node to see its children. Double-click on a node to see its ancestors.
+    <div id="tree"></div>
+{% endblock %}

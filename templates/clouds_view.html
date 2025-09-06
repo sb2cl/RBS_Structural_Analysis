@@ -1,0 +1,58 @@
+{% extends 'index.html' %}
+
+{% block title %}Clouds View{% endblock %}
+
+{% block content %}
+    <h1>Clouds View</h1>
+
+    <div id="chart"></div>
+
+    <script>
+      // Data from Flask
+      const xClusters = {{ clusters | tojson }};
+      const yMeans    = {{ means   | tojson }};
+      const yStd      = {{ stds    | tojson }};
+      const seqUnique = {{ seqs    | tojson }};
+
+      // Optional: wrap long sequences for nicer hover readability
+      const wrapSeq = (s, width = 60) =>
+        (s ?? "").toString().replace(new RegExp(`(.{1,${width}})`, "g"), "$1\n");
+
+      const seqWrapped = seqUnique.map(s => wrapSeq(s));
+
+      const trace = {
+        x: xClusters,
+        y: yMeans,
+        mode: "markers",
+        type: "scatter",
+        marker: { size: 10, symbol: "circle" },
+        error_y: {
+          type: "data",
+          array: yStd,
+          visible: true,
+          thickness: 1.5,
+          width: 4
+        },
+        // std available to hover as %{customdata:.4f}
+        customdata: yStd,
+        // sequences available to hover as %{text}
+        text: seqWrapped,
+        hovertemplate:
+          "Cloud #: %{x}<br>" +
+          "Mean Cloud Relative Expression: %{y:.4f}<br>" +
+          "Cloud Expression STD: %{customdata:.4f}<br>" +
+          "<b>Core Sequences</b>:<br>%{text}<extra></extra>"
+      };
+
+      const layout = {
+        title: "Clouds View",
+        xaxis: { title: "Cloud", type: "category" }, // use "linear" for numeric spacing
+        yaxis: { title: "Mean Cloud Relative Expression"},
+        margin: { t: 50, r: 20, b: 60, l: 60 },
+        hoverlabel: { font: { family: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" } }
+      };
+
+      Plotly.newPlot("chart", [trace], layout, { responsive: true });
+    </script>
+
+{% endblock %}

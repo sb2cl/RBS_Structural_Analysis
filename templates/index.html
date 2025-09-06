@@ -23,6 +23,12 @@
             text-align: center;
             width: 40px;
         }
+
+        #chart {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
     </style>
 
 </head>
@@ -53,8 +59,16 @@
                        href="/etr_to_sequence">ETR to Sequence</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link{% if url_for(request.endpoint) == '/browse_clusters' %} active{% endif %}"
-                       href="/browse_clusters">Browse Clusters</a>
+                    <a class="nav-link{% if url_for(request.endpoint) == '/browse_clouds' %} active{% endif %}"
+                       href="/browse_clouds">Browse Clouds</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link{% if url_for(request.endpoint) == '/tree_view' %} active{% endif %}"
+                       href="/tree_view">Tree View</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link{% if url_for(request.endpoint) == '/clouds_view' %} active{% endif %}"
+                       href="/clouds_view">Clouds View</a>
                 </li>
             </ul>
         </div>
